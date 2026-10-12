@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>피자 공방 🍕</title>
+<style>
+:root{color-scheme:dark;--cream:#fff1ce;--tomato:#ff755d;--gold:#ffd56b;--mint:#a9f4d0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:18px;display:grid;place-items:center;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#fff8e9;background:radial-gradient(ellipse at top,#4a2743,#1d1830 58%,#111326)}
+.app{width:min(100%,860px)}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+h1{font-size:clamp(24px,5vw,34px);margin:0;letter-spacing:-1.2px}h1 span{color:var(--gold)}
+.topstat{background:#ffffff12;border:1px solid #ffffff20;border-radius:14px;padding:8px 12px;text-align:center;min-width:92px}.topstat small{display:block;color:#d6c6df;font-size:11px}.topstat strong{font-size:19px}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.card{background:#ffffff0b;border:1px solid #ffffff20;border-radius:20px;padding:16px;box-shadow:0 18px 45px #0002}
+.kicker{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:900}
+h2{font-size:19px;margin:5px 0 12px}
+.pizza-stage{min-height:390px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:16px;background:radial-gradient(ellipse,#543047,#2a203b 68%,#211b34)}
+canvas{width:min(100%,400px);aspect-ratio:1;display:block;touch-action:manipulation}
+.tip{font-size:12px;color:#d8cde3;text-align:center;margin:8px 0 0;line-height:1.6}
+.order{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#ffffff0c;border:1px solid #ffffff14;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.order strong{color:var(--mint)}
+.ingredients{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ingredient{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid #ffffff20;background:#ffffff0a;color:#fff8e9;padding:10px;border-radius:13px;cursor:pointer;min-width:0;font:inherit}
+.ingredient .emoji{font-size:25px;line-height:1}
+.ingredient .name{font-weight:750;font-size:13px}.ingredient small{display:block;color:#c6b9d4;font-size:11px;margin-top:2px}
+.ingredient.active{border-color:var(--gold);background:#ffd56b20;box-shadow:inset 0 0 0 1px #ffd56b44}
+.ingredient:disabled{opacity:.4;cursor:not-allowed}
+.controls{display:flex;gap:8px;margin-top:12px}.controls button{flex:1}
+button.primary,button.secondary{border:0;border-radius:999px;padding:12px 15px;font-weight:850;cursor:pointer;font-size:14px}
+.primary{color:#2d1723;background:linear-gradient(100deg,#ffd56b,#ffb16c)}.secondary{color:#fff3e2;background:#ffffff12;border:1px solid #ffffff20!important}
+button:active{transform:scale(.98)}
+.feedback{margin-top:12px;padding:11px 12px;border-radius:12px;background:#0002;color:#e6dced;font-size:13px;line-height:1.55;min-height:47px}
+.result{margin-top:12px;text-align:center;border:1px solid #ffffff1c;background:#ffffff08;border-radius:14px;padding:12px}
+.result strong{font-size:23px;color:var(--gold)}.result small{display:block;color:#d4c7de;margin-top:3px}
+@media(max-width:650px){body{padding:12px}.layout{grid-template-columns:1fr}.pizza-stage{min-height:0}.card{padding:13px}header{align-items:flex-start}.topstat{min-width:78px}.ingredients{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div><div class="kicker">LITTLE PIZZERIA</div><h1>피자 <span>공방</span> 🍕</h1></div><div class="topstat"><small>오늘의 주문</small><strong id="orderNo">#001</strong></div></header>
+<div class="layout">
+<section class="card">
+<div class="kicker">YOUR PIZZA</div><h2>나만의 피자 만들기</h2>
+<div class="pizza-stage"><canvas id="pizza" width="500" height="500" aria-label="재료를 올려 피자를 만드는 화면"></canvas></div>
+<p class="tip">오른쪽에서 재료를 선택한 뒤 피자 위를 톡톡 눌러 올려보세요!<br>선택한 재료 버튼을 다시 누르면 올리기를 멈춰요.</p>
+<div class="result"><div>현재 피자 점수</div><strong id="liveScore">0점</strong><small id="liveHint">도우부터 시작해 보세요.</small></div>
+</section>
+<section class="card">
+<div class="kicker">CHEF'S COUNTER</div><h2>주문서 & 재료</h2>
+<div class="order"><div><small style="color:#c6b9d4">손님이 원하는 피자</small><br><strong id="orderName">치즈 폭탄 피자</strong></div><span id="orderEmoji" style="font-size:29px">🧀</span></div>
+<div class="ingredients" id="ingredients"></div>
+<div class="controls"><button class="secondary" id="clear">다시 만들기</button><button class="primary" id="serve">손님에게 서빙! ✨</button></div>
+<div class="feedback" id="feedback" aria-live="polite">① 도우를 선택하고 피자를 눌러주세요.</div>
+<div class="result"><div>누적 팁 💰</div><strong id="tips">0원</strong><small id="lastResult">맛있는 피자를 만들면 팁을 받을 수 있어요.</small></div>
+</section>
+</div>
+</main>
+<script>
+(()=>{
+const canvas=document.getElementById('pizza'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+const ingredients=[
+{id:'dough',emoji:'🫓',name:'도우',desc:'피자 바닥',color:'#e8b96d',base:true},
+{id:'sauce',emoji:'🍅',name:'토마토소스',desc:'새콤한 소스',color:'#e95745'},
+{id:'cheese',emoji:'🧀',name:'모차렐라',desc:'쭉 늘어나는 치즈',color:'#ffe9a0'},
+{id:'pepperoni',emoji:'🍕',name:'페퍼로니',desc:'짭짤한 토핑',color:'#bd3e3e'},
+{id:'mushroom',emoji:'🍄',name:'버섯',desc:'쫄깃한 풍미',color:'#d5b8a1'},
+{id:'olive',emoji:'🫒',name:'올리브',desc:'톡톡한 감칠맛',color:'#32383b'},
+{id:'pepper',emoji:'🫑',name:'피망',desc:'아삭한 초록빛',color:'#52a95b'},
+{id:'onion',emoji:'🧅',name:'양파',desc:'달콤한 향',color:'#dca5d7'},
+{id:'pineapple',emoji:'🍍',name:'파인애플',desc:'달콤한 한입',color:'#f6c94e'}
+];
+const orders=[
+{name:'치즈 폭탄 피자',emoji:'🧀',need:['dough','sauce','cheese','cheese','cheese']},
+{name:'페퍼로니 클래식',emoji:'🍕',need:['dough','sauce','cheese','pepperoni','pepperoni']},
+{name:'숲속 버섯 피자',emoji:'🍄',need:['dough','sauce','cheese','mushroom','olive']},
+{name:'알록달록 야채 피자',emoji:'🫑',need:['dough','sauce','cheese','pepper','onion','olive']},
+{name:'하와이안 피자',emoji:'🍍',need:['dough','sauce','cheese','pineapple','pepperoni']}
+];
+let orderIndex=0,selected='dough',placed=[],tips=0,orderNo=1;
+const rand=(a,b)=>a+Math.random()*(b-a);
+function newSpot(){let a=rand(0,Math.PI*2),r=Math.sqrt(Math.random())*133;return{x:250+Math.cos(a)*r,y:250+Math.sin(a)*r};}
+function draw(){
+ctx.clearRect(0,0,500,500);
+ctx.save();ctx.shadowColor='#0008';ctx.shadowBlur=18;ctx.shadowOffsetY=10;
+ctx.fillStyle='#bd7a40';ctx.beginPath();ctx.arc(250,250,207,0,Math.PI*2);ctx.fill();ctx.restore();
+ctx.fillStyle='#f5d18b';ctx.beginPath();ctx.arc(250,250,190,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle='#e6ad5f';ctx.lineWidth=5;ctx.beginPath();ctx.arc(250,250,181,0,Math.PI*2);ctx.stroke();
+const sauce=placed.some(p=>p.id==='sauce');
+if(sauce){ctx.fillStyle='#d94839';ctx.beginPath();ctx.arc(250,250,169,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ed6950';for(let i=0;i<35;i++){let a=i*2.4,r=(i%5)*29;ctx.beginPath();ctx.arc(250+Math.cos(a)*r,250+Math.sin(a)*r,3,0,Math.PI*2);ctx.fill();}}
+const cheeseCount=placed.filter(p=>p.id==='cheese').length;
+if(cheeseCount){ctx.fillStyle='#ffe9a6';ctx.beginPath();ctx.arc(250,250,164,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff2c5';for(let i=0;i<90;i++){let a=i*2.399,r=Math.sqrt((i*37)%100)/10*150;ctx.beginPath();ctx.arc(250+Math.cos(a)*r,250+Math.sin(a)*r,rand(2,4),0,Math.PI*2);ctx.fill();}}
+placed.filter(p=>!['dough','sauce','cheese'].includes(p.id)).forEach(p=>drawTopping(p));
+if(!placed.length){ctx.fillStyle='#8c573b';ctx.font='bold 21px system-ui';ctx.textAlign='center';ctx.fillText('여기에 재료를 올려주세요!',250,250);}
+ctx.fillStyle='#fff8e9';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('✦ LITTLE PIZZERIA ✦',250,472);
+}
+function drawTopping(p){
+const {x,y,id}=p;ctx.save();ctx.translate(x,y);
+if(id==='pepperoni'){ctx.fillStyle='#8f252e';ctx.beginPath();ctx.arc(0,0,16,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d9554d';ctx.beginPath();ctx.arc(-2,-2,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f7b17b';for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(rand(-7,7),rand(-7,7),1.6,0,Math.PI*2);ctx.fill();}}
+else if(id==='mushroom'){ctx.fillStyle='#c39b7b';ctx.beginPath();ctx.ellipse(0,0,14,9,-.2,Math.PI,Math.PI*2);ctx.lineTo(10,7);ctx.quadraticCurveTo(0,12,-10,7);ctx.closePath();ctx.fill();ctx.fillStyle='#f3d7b2';ctx.fillRect(-3,3,6,7);}
+else if(id==='olive'){ctx.strokeStyle='#293235';ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,8,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#8e9a75';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.stroke();}
+else if(id==='pepper'){ctx.strokeStyle='#28874c';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-10,-8);ctx.quadraticCurveTo(0,0,10,8);ctx.stroke();ctx.strokeStyle='#7dd16d';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-10,-8);ctx.quadraticCurveTo(0,0,10,8);ctx.stroke();}
+else if(id==='onion'){ctx.strokeStyle='#c989cb';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,11,7,.5,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#f5d9ed';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,6,3,.5,0,Math.PI*2);ctx.stroke();}
+else if(id==='pineapple'){ctx.fillStyle='#f6c94e';ctx.beginPath();ctx.roundRect(-9,-9,18,18,4);ctx.fill();ctx.strokeStyle='#fff0a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(5,5);ctx.moveTo(5,-5);ctx.lineTo(-5,5);ctx.stroke();}
+ctx.restore();
+}
+function updateScore(){
+const counts={};placed.forEach(p=>counts[p.id]=(counts[p.id]||0)+1);
+let score=0;
+if(counts.dough)score+=10;if(counts.sauce)score+=15;if(counts.cheese)score+=Math.min(30,counts.cheese*10);
+Object.keys(counts).filter(id=>!['dough','sauce','cheese'].includes(id)).forEach(id=>score+=Math.min(25,counts[id]*8));
+$('liveScore').textContent=score+'점';
+$('liveHint').textContent=placed.length?`재료 ${placed.length}개를 올렸어요!`:'도우부터 시작해 보세요.';
+}
+function feedback(t){$('feedback').textContent=t;}
+function buildButtons(){
+const root=$('ingredients');root.innerHTML='';
+ingredients.forEach(it=>{
+const b=document.createElement('button');b.className='ingredient';b.dataset.id=it.id;
+b.innerHTML=`<span class="emoji">${it.emoji}</span><span><span class="name">${it.name}</span><small>${it.desc}</small></span>`;
+b.addEventListener('click',()=>{
+if(it.base&&placed.some(p=>p.id==='dough')){selected=it.id;feedback('도우는 이미 준비됐어요. 다른 재료를 골라보세요!');return;}
+selected=selected===it.id?'':it.id;
+root.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.id===selected));
+feedback(selected?`${it.name} 선택 완료! 피자 위를 눌러 재료를 올리세요.`:'재료 선택을 해제했어요.');
+});root.appendChild(b);
+});
+}
+function refreshOrder(){const o=orders[orderIndex%orders.length];$('orderName').textContent=o.name;$('orderEmoji').textContent=o.emoji;$('orderNo').textContent='#'+String(orderNo).padStart(3,'0');}
+function serve(){
+const o=orders[orderIndex%orders.length],need={};o.need.forEach(id=>need[id]=(need[id]||0)+1);
+const got={};placed.forEach(p=>got[p.id]=(got[p.id]||0)+1);
+let matched=0,total=o.need.length;
+Object.keys(need).forEach(id=>matched+=Math.min(need[id],got[id]||0));
+const pct=Math.round(matched/total*100),bonus=pct===100?500:pct>=70?250:pct>=40?100:0;
+tips+=bonus;$('tips').textContent=tips.toLocaleString('ko-KR')+'원';
+$('lastResult').textContent=pct===100?'완벽한 주문! 손님이 아주 좋아해요!':`주문 완성도 ${pct}% · 다음엔 주문 재료를 더 맞춰보세요.`;
+feedback(pct===100?`대성공! 주문과 똑같은 피자예요. 팁 ${bonus}원을 받았어요!`:pct>=70?`잘 만들었어요! 주문 완성도 ${pct}%. 팁 ${bonus}원을 받았어요.`:`주문 완성도 ${pct}%. 팁 ${bonus}원! 주문서의 재료를 확인해 보세요.`);
+orderIndex++;orderNo++;placed=[];selected='dough';buildButtons();refreshOrder();draw();updateScore();
+}
+canvas.addEventListener('click',e=>{
+if(!selected){feedback('먼저 재료를 선택해주세요!');return;}
+if(selected==='dough'&&placed.some(p=>p.id==='dough')){feedback('도우는 한 번만 놓을 수 있어요. 다른 재료를 골라주세요.');return;}
+const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*500,y=(e.clientY-rect.top)/rect.height*500;
+if(Math.hypot(x-250,y-250)>174){feedback('피자 안쪽에 재료를 올려주세요!');return;}
+if(selected==='sauce'&&placed.some(p=>p.id==='sauce')){feedback('소스는 이미 발랐어요!');return;}
+if(selected==='cheese'&&!placed.some(p=>p.id==='sauce')){feedback('먼저 토마토소스를 발라주세요!');return;}
+if(!placed.some(p=>p.id==='dough')&&selected!=='dough'){feedback('먼저 도우를 준비해주세요!');return;}
+if(selected==='dough'){placed.push({id:selected,x:250,y:250});selected='sauce';}
+else placed.push({id:selected,x,y});
+buildButtons();draw();updateScore();feedback(`${ingredients.find(i=>i.id===placed[placed.length-1].id).name} 추가 완료! 계속 꾸며보세요.`);
+});
+$('clear').addEventListener('click',()=>{placed=[];selected='dough';buildButtons();draw();updateScore();feedback('새 피자를 만들어요. 도우부터 시작하세요!');});
+$('serve').addEventListener('click',()=>{if(!placed.some(p=>p.id==='dough')){feedback('아직 도우가 없어요! 도우부터 만들어주세요.');return;}if(!placed.some(p=>p.id==='sauce')){feedback('토마토소스를 바르면 더 맛있어져요!');return;}serve();});
+buildButtons();refreshOrder();draw();updateScore();
+})();
+</script>
+</body>
+</html>
