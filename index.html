@@ -1,160 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>피자 공방 🍕</title>
-<style>
-:root{color-scheme:dark;--cream:#fff1ce;--tomato:#ff755d;--gold:#ffd56b;--mint:#a9f4d0}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;padding:18px;display:grid;place-items:center;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#fff8e9;background:radial-gradient(ellipse at top,#4a2743,#1d1830 58%,#111326)}
-.app{width:min(100%,860px)}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-h1{font-size:clamp(24px,5vw,34px);margin:0;letter-spacing:-1.2px}h1 span{color:var(--gold)}
-.topstat{background:#ffffff12;border:1px solid #ffffff20;border-radius:14px;padding:8px 12px;text-align:center;min-width:92px}.topstat small{display:block;color:#d6c6df;font-size:11px}.topstat strong{font-size:19px}
-.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-.card{background:#ffffff0b;border:1px solid #ffffff20;border-radius:20px;padding:16px;box-shadow:0 18px 45px #0002}
-.kicker{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:900}
-h2{font-size:19px;margin:5px 0 12px}
-.pizza-stage{min-height:390px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:16px;background:radial-gradient(ellipse,#543047,#2a203b 68%,#211b34)}
-canvas{width:min(100%,400px);aspect-ratio:1;display:block;touch-action:manipulation}
-.tip{font-size:12px;color:#d8cde3;text-align:center;margin:8px 0 0;line-height:1.6}
-.order{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#ffffff0c;border:1px solid #ffffff14;border-radius:12px;padding:10px 12px;margin-bottom:12px}
-.order strong{color:var(--mint)}
-.ingredients{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.ingredient{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid #ffffff20;background:#ffffff0a;color:#fff8e9;padding:10px;border-radius:13px;cursor:pointer;min-width:0;font:inherit}
-.ingredient .emoji{font-size:25px;line-height:1}
-.ingredient .name{font-weight:750;font-size:13px}.ingredient small{display:block;color:#c6b9d4;font-size:11px;margin-top:2px}
-.ingredient.active{border-color:var(--gold);background:#ffd56b20;box-shadow:inset 0 0 0 1px #ffd56b44}
-.ingredient:disabled{opacity:.4;cursor:not-allowed}
-.controls{display:flex;gap:8px;margin-top:12px}.controls button{flex:1}
-button.primary,button.secondary{border:0;border-radius:999px;padding:12px 15px;font-weight:850;cursor:pointer;font-size:14px}
-.primary{color:#2d1723;background:linear-gradient(100deg,#ffd56b,#ffb16c)}.secondary{color:#fff3e2;background:#ffffff12;border:1px solid #ffffff20!important}
-button:active{transform:scale(.98)}
-.feedback{margin-top:12px;padding:11px 12px;border-radius:12px;background:#0002;color:#e6dced;font-size:13px;line-height:1.55;min-height:47px}
-.result{margin-top:12px;text-align:center;border:1px solid #ffffff1c;background:#ffffff08;border-radius:14px;padding:12px}
-.result strong{font-size:23px;color:var(--gold)}.result small{display:block;color:#d4c7de;margin-top:3px}
-@media(max-width:650px){body{padding:12px}.layout{grid-template-columns:1fr}.pizza-stage{min-height:0}.card{padding:13px}header{align-items:flex-start}.topstat{min-width:78px}.ingredients{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>영어 과외 학습 플래너</title>
+  <style>
+    :root{--ink:#20243a;--muted:#737991;--line:#e8eaf2;--purple:#6958d9;--pale:#f1efff;--bg:#f7f8fc;--green:#15845d}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input,textarea{font:inherit} button{cursor:pointer}
+    .shell{max-width:1080px;margin:auto;padding:36px 22px 64px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;background:var(--purple);color:white;display:grid;place-items:center;font-size:24px}
+    h1{font-size:22px;margin:0} .sub{color:var(--muted);font-size:14px;margin:4px 0 0}
+    .date{background:white;border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--muted);font-size:14px}
+    .welcome{background:linear-gradient(115deg,#6c5ce7,#8c79ef);color:white;border-radius:22px;padding:27px 30px;margin-bottom:24px;box-shadow:0 12px 28px #6958d924}
+    .welcome h2{margin:0 0 7px;font-size:23px}.welcome p{margin:0;color:#eeeaff}.welcome strong{color:white}
+    .stats{display:flex;gap:18px;margin-top:20px;flex-wrap:wrap}.stat{background:#ffffff20;padding:10px 14px;border-radius:12px;font-size:14px}
+    .section-title{display:flex;align-items:end;justify-content:space-between;margin:30px 0 14px}.section-title h2{margin:0;font-size:18px}.section-title p{margin:0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.tile{background:white;border:1px solid var(--line);border-radius:17px;padding:19px;text-align:left;min-height:128px;color:var(--ink);transition:.15s}.tile:hover{transform:translateY(-2px);border-color:#c9c2ff;box-shadow:0 8px 20px #28245b0c}.tile .icon{font-size:24px}.tile h3{margin:12px 0 4px;font-size:16px}.tile p{margin:0;color:var(--muted);font-size:13px}
+    .panel{margin-top:24px;background:white;border:1px solid var(--line);border-radius:18px;padding:22px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel h2{font-size:18px;margin:0}.hint{font-size:13px;color:var(--muted);margin:6px 0 18px}
+    .add-row{display:grid;grid-template-columns:1fr 155px auto;gap:9px;margin-bottom:14px}.field{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);outline:none}.field:focus{border-color:var(--purple);box-shadow:0 0 0 3px #6958d91c}.primary{border:0;border-radius:10px;padding:10px 15px;background:var(--purple);color:#fff;font-weight:650}.secondary{border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);padding:8px 11px}
+    .list{display:grid;gap:10px}.task{border:1px solid var(--line);border-radius:13px;padding:14px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start}.task.done{background:#f5fbf8}.check{width:22px;height:22px;margin-top:2px;accent-color:var(--green);cursor:pointer}.task-title{font-weight:650}.task.done .task-title{text-decoration:line-through;color:#78857f}.meta{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:5px}.badge{border-radius:999px;background:#fff2e8;color:#af641a;padding:3px 8px}.badge.complete{background:#e5f6ee;color:var(--green)}.answer{font-size:13px;color:#555c70;margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px;font-size:14px}
+    .notice{margin-top:17px;padding:13px 15px;background:#f7f6ff;border-radius:12px;color:#625b88;font-size:13px;line-height:1.6}.footer{text-align:center;color:#9297aa;font-size:12px;margin-top:28px}
+    .modal-back{position:fixed;inset:0;background:#15162966;display:none;place-items:center;padding:18px;z-index:3}.modal-back.open{display:grid}.modal{width:min(500px,100%);background:white;border-radius:18px;padding:23px;box-shadow:0 20px 70px #1113}.modal h2{margin:0 0 5px;font-size:19px}.modal p{color:var(--muted);font-size:13px;margin:0 0 15px}.modal textarea{min-height:125px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px}
+    @media(max-width:700px){.shell{padding:22px 15px 40px}.grid{grid-template-columns:repeat(2,1fr)}.welcome{padding:22px}.add-row{grid-template-columns:1fr 130px}.add-row .primary{grid-column:1/-1}.date{display:none}}
+    @media(max-width:420px){.grid{grid-template-columns:1fr 1fr;gap:9px}.tile{padding:14px;min-height:120px}.panel{padding:16px}.task{gap:9px}}
+  </style>
 </head>
 <body>
-<main class="app">
-<header><div><div class="kicker">LITTLE PIZZERIA</div><h1>피자 <span>공방</span> 🍕</h1></div><div class="topstat"><small>오늘의 주문</small><strong id="orderNo">#001</strong></div></header>
-<div class="layout">
-<section class="card">
-<div class="kicker">YOUR PIZZA</div><h2>나만의 피자 만들기</h2>
-<div class="pizza-stage"><canvas id="pizza" width="500" height="500" aria-label="재료를 올려 피자를 만드는 화면"></canvas></div>
-<p class="tip">오른쪽에서 재료를 선택한 뒤 피자 위를 톡톡 눌러 올려보세요!<br>선택한 재료 버튼을 다시 누르면 올리기를 멈춰요.</p>
-<div class="result"><div>현재 피자 점수</div><strong id="liveScore">0점</strong><small id="liveHint">도우부터 시작해 보세요.</small></div>
-</section>
-<section class="card">
-<div class="kicker">CHEF'S COUNTER</div><h2>주문서 & 재료</h2>
-<div class="order"><div><small style="color:#c6b9d4">손님이 원하는 피자</small><br><strong id="orderName">치즈 폭탄 피자</strong></div><span id="orderEmoji" style="font-size:29px">🧀</span></div>
-<div class="ingredients" id="ingredients"></div>
-<div class="controls"><button class="secondary" id="clear">다시 만들기</button><button class="primary" id="serve">손님에게 서빙! ✨</button></div>
-<div class="feedback" id="feedback" aria-live="polite">① 도우를 선택하고 피자를 눌러주세요.</div>
-<div class="result"><div>누적 팁 💰</div><strong id="tips">0원</strong><small id="lastResult">맛있는 피자를 만들면 팁을 받을 수 있어요.</small></div>
-</section>
-</div>
-</main>
+  <main class="shell">
+    <header><div class="brand"><div class="logo" aria-hidden="true">✦</div><div><h1>영어 과외 플래너</h1><p class="sub">공부와 숙제를 한곳에서 관리해요</p></div></div><div class="date" id="today"></div></header>
+    <section class="welcome"><h2>오늘도 한 걸음씩, 잘하고 있어요! 👋</h2><p>할 일을 확인하고 완료한 숙제는 제출 체크해 보세요.</p><div class="stats"><div class="stat">📚 남은 숙제 <strong id="remaining">0</strong>개</div><div class="stat">✅ 제출 완료 <strong id="completed">0</strong>개</div></div></section>
+    <div class="section-title"><h2>무엇을 할까요?</h2><p>카드를 선택해 바로 시작하세요</p></div>
+    <section class="grid" aria-label="학습 기능">
+      <button class="tile" data-target="homework"><span class="icon">📝</span><h3>숙제 목록</h3><p>할 일을 확인하고 제출 체크</p></button>
+      <button class="tile" data-target="vocab"><span class="icon">📚</span><h3>단어 외우기</h3><p>단어 카드로 뜻을 확인해요</p></button>
+      <button class="tile" data-target="schedule"><span class="icon">🗓️</span><h3>수업 일정</h3><p>과외와 학원 일정을 기록</p></button>
+      <button class="tile" data-target="question"><span class="icon">❓</span><h3>선생님께 질문</h3><p>궁금한 내용을 적어 두기</p></button>
+      <button class="tile" data-target="study"><span class="icon">⏱️</span><h3>공부 기록</h3><p>오늘 공부한 내용을 기록</p></button>
+      <button class="tile" data-target="progress"><span class="icon">📊</span><h3>학습 현황</h3><p>숙제 제출 현황을 확인</p></button>
+    </section>
+    <section class="panel" id="homework"><div class="panel-head"><h2>📝 숙제 To-do list</h2><button class="secondary" id="clearDone">완료 항목 지우기</button></div><p class="hint">숙제를 추가하고, 답안을 적은 뒤 제출하면 완료로 체크돼요.</p>
+      <form class="add-row" id="addForm"><input class="field" id="newTitle" placeholder="예: Unit 3 문제 풀기" maxlength="100" required><input class="field" id="newDue" type="date" aria-label="마감일"><button class="primary">+ 숙제 추가</button></form><div class="list" id="taskList"></div>
+      <div class="notice">💡 제출 상태는 이 브라우저에 저장됩니다. 선생님과 실시간으로 공유하거나 파일을 올리는 기능은 서버가 연결되어야 사용할 수 있어요.</div>
+    </section>
+    <section class="panel" id="vocab"><div class="panel-head"><h2>📚 오늘의 단어</h2><button class="secondary" id="showMeaning">뜻 보기</button></div><p class="hint">단어를 떠올린 다음 뜻을 확인해 보세요.</p><div id="wordCard" style="padding:22px;background:#f7f6ff;border-radius:13px;text-align:center"><div id="word" style="font-size:27px;font-weight:750">achieve</div><div id="meaning" style="color:#69627f;margin-top:7px;display:none">이루다, 성취하다</div><button class="secondary" id="nextWord" style="margin-top:15px">다음 단어 →</button></div></section>
+    <section class="panel" id="schedule"><h2>🗓️ 일정 메모</h2><p class="hint">과외나 학원 일정을 브라우저에 간단히 기록해요.</p><form class="add-row" id="scheduleForm"><input class="field" id="scheduleText" placeholder="예: 영어 과외" required maxlength="80"><input class="field" id="scheduleDate" type="date" aria-label="일정 날짜"><button class="primary">일정 추가</button></form><div class="list" id="scheduleList"></div></section>
+    <section class="panel" id="question"><h2>❓ 선생님께 질문 메모</h2><p class="hint">질문을 적어 두었다가 수업 때 물어보세요.</p><textarea class="field" id="questionText" placeholder="궁금한 문법이나 문제를 적어 보세요." rows="3"></textarea><button class="primary" id="saveQuestion" style="margin-top:9px">질문 저장</button><div id="savedQuestion" class="hint" style="margin-top:12px"></div></section>
+    <section class="panel" id="study"><h2>⏱️ 오늘 공부 기록</h2><p class="hint">오늘 공부한 내용과 시간을 기록해요.</p><div class="add-row"><input class="field" id="studyText" placeholder="예: 단어 20개 복습"><input class="field" id="studyMinutes" type="number" min="1" placeholder="분"><button class="primary" id="saveStudy">기록 추가</button></div><div class="list" id="studyList"></div></section>
+    <section class="panel" id="progress"><h2>📊 학습 현황</h2><p class="hint" id="progressText"></p><div style="height:12px;background:#eeeefa;border-radius:99px;overflow:hidden"><div id="progressBar" style="height:100%;width:0;background:#6958d9;transition:width .25s"></div></div></section>
+    <div class="footer">내 학습 플래너 · 입력한 정보는 현재 브라우저에 저장됩니다.</div>
+  </main>
+  <div class="modal-back" id="submitModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><h2 id="modalTitle">숙제 제출</h2><p id="modalTask"></p><textarea class="field" id="answerText" placeholder="답안이나 제출 메모를 적어 주세요."></textarea><div class="modal-actions"><button class="secondary" id="cancelSubmit">취소</button><button class="primary" id="confirmSubmit">제출 완료</button></div></div></div>
 <script>
-(()=>{
-const canvas=document.getElementById('pizza'),ctx=canvas.getContext('2d');
-const $=id=>document.getElementById(id);
-const ingredients=[
-{id:'dough',emoji:'🫓',name:'도우',desc:'피자 바닥',color:'#e8b96d',base:true},
-{id:'sauce',emoji:'🍅',name:'토마토소스',desc:'새콤한 소스',color:'#e95745'},
-{id:'cheese',emoji:'🧀',name:'모차렐라',desc:'쭉 늘어나는 치즈',color:'#ffe9a0'},
-{id:'pepperoni',emoji:'🍕',name:'페퍼로니',desc:'짭짤한 토핑',color:'#bd3e3e'},
-{id:'mushroom',emoji:'🍄',name:'버섯',desc:'쫄깃한 풍미',color:'#d5b8a1'},
-{id:'olive',emoji:'🫒',name:'올리브',desc:'톡톡한 감칠맛',color:'#32383b'},
-{id:'pepper',emoji:'🫑',name:'피망',desc:'아삭한 초록빛',color:'#52a95b'},
-{id:'onion',emoji:'🧅',name:'양파',desc:'달콤한 향',color:'#dca5d7'},
-{id:'pineapple',emoji:'🍍',name:'파인애플',desc:'달콤한 한입',color:'#f6c94e'}
-];
-const orders=[
-{name:'치즈 폭탄 피자',emoji:'🧀',need:['dough','sauce','cheese','cheese','cheese']},
-{name:'페퍼로니 클래식',emoji:'🍕',need:['dough','sauce','cheese','pepperoni','pepperoni']},
-{name:'숲속 버섯 피자',emoji:'🍄',need:['dough','sauce','cheese','mushroom','olive']},
-{name:'알록달록 야채 피자',emoji:'🫑',need:['dough','sauce','cheese','pepper','onion','olive']},
-{name:'하와이안 피자',emoji:'🍍',need:['dough','sauce','cheese','pineapple','pepperoni']}
-];
-let orderIndex=0,selected='dough',placed=[],tips=0,orderNo=1;
-const rand=(a,b)=>a+Math.random()*(b-a);
-function newSpot(){let a=rand(0,Math.PI*2),r=Math.sqrt(Math.random())*133;return{x:250+Math.cos(a)*r,y:250+Math.sin(a)*r};}
-function draw(){
-ctx.clearRect(0,0,500,500);
-ctx.save();ctx.shadowColor='#0008';ctx.shadowBlur=18;ctx.shadowOffsetY=10;
-ctx.fillStyle='#bd7a40';ctx.beginPath();ctx.arc(250,250,207,0,Math.PI*2);ctx.fill();ctx.restore();
-ctx.fillStyle='#f5d18b';ctx.beginPath();ctx.arc(250,250,190,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle='#e6ad5f';ctx.lineWidth=5;ctx.beginPath();ctx.arc(250,250,181,0,Math.PI*2);ctx.stroke();
-const sauce=placed.some(p=>p.id==='sauce');
-if(sauce){ctx.fillStyle='#d94839';ctx.beginPath();ctx.arc(250,250,169,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ed6950';for(let i=0;i<35;i++){let a=i*2.4,r=(i%5)*29;ctx.beginPath();ctx.arc(250+Math.cos(a)*r,250+Math.sin(a)*r,3,0,Math.PI*2);ctx.fill();}}
-const cheeseCount=placed.filter(p=>p.id==='cheese').length;
-if(cheeseCount){ctx.fillStyle='#ffe9a6';ctx.beginPath();ctx.arc(250,250,164,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff2c5';for(let i=0;i<90;i++){let a=i*2.399,r=Math.sqrt((i*37)%100)/10*150;ctx.beginPath();ctx.arc(250+Math.cos(a)*r,250+Math.sin(a)*r,rand(2,4),0,Math.PI*2);ctx.fill();}}
-placed.filter(p=>!['dough','sauce','cheese'].includes(p.id)).forEach(p=>drawTopping(p));
-if(!placed.length){ctx.fillStyle='#8c573b';ctx.font='bold 21px system-ui';ctx.textAlign='center';ctx.fillText('여기에 재료를 올려주세요!',250,250);}
-ctx.fillStyle='#fff8e9';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('✦ LITTLE PIZZERIA ✦',250,472);
-}
-function drawTopping(p){
-const {x,y,id}=p;ctx.save();ctx.translate(x,y);
-if(id==='pepperoni'){ctx.fillStyle='#8f252e';ctx.beginPath();ctx.arc(0,0,16,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d9554d';ctx.beginPath();ctx.arc(-2,-2,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f7b17b';for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(rand(-7,7),rand(-7,7),1.6,0,Math.PI*2);ctx.fill();}}
-else if(id==='mushroom'){ctx.fillStyle='#c39b7b';ctx.beginPath();ctx.ellipse(0,0,14,9,-.2,Math.PI,Math.PI*2);ctx.lineTo(10,7);ctx.quadraticCurveTo(0,12,-10,7);ctx.closePath();ctx.fill();ctx.fillStyle='#f3d7b2';ctx.fillRect(-3,3,6,7);}
-else if(id==='olive'){ctx.strokeStyle='#293235';ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,8,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#8e9a75';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.stroke();}
-else if(id==='pepper'){ctx.strokeStyle='#28874c';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-10,-8);ctx.quadraticCurveTo(0,0,10,8);ctx.stroke();ctx.strokeStyle='#7dd16d';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-10,-8);ctx.quadraticCurveTo(0,0,10,8);ctx.stroke();}
-else if(id==='onion'){ctx.strokeStyle='#c989cb';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,11,7,.5,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#f5d9ed';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,6,3,.5,0,Math.PI*2);ctx.stroke();}
-else if(id==='pineapple'){ctx.fillStyle='#f6c94e';ctx.beginPath();ctx.roundRect(-9,-9,18,18,4);ctx.fill();ctx.strokeStyle='#fff0a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(5,5);ctx.moveTo(5,-5);ctx.lineTo(-5,5);ctx.stroke();}
-ctx.restore();
-}
-function updateScore(){
-const counts={};placed.forEach(p=>counts[p.id]=(counts[p.id]||0)+1);
-let score=0;
-if(counts.dough)score+=10;if(counts.sauce)score+=15;if(counts.cheese)score+=Math.min(30,counts.cheese*10);
-Object.keys(counts).filter(id=>!['dough','sauce','cheese'].includes(id)).forEach(id=>score+=Math.min(25,counts[id]*8));
-$('liveScore').textContent=score+'점';
-$('liveHint').textContent=placed.length?`재료 ${placed.length}개를 올렸어요!`:'도우부터 시작해 보세요.';
-}
-function feedback(t){$('feedback').textContent=t;}
-function buildButtons(){
-const root=$('ingredients');root.innerHTML='';
-ingredients.forEach(it=>{
-const b=document.createElement('button');b.className='ingredient';b.dataset.id=it.id;
-b.innerHTML=`<span class="emoji">${it.emoji}</span><span><span class="name">${it.name}</span><small>${it.desc}</small></span>`;
-b.addEventListener('click',()=>{
-if(it.base&&placed.some(p=>p.id==='dough')){selected=it.id;feedback('도우는 이미 준비됐어요. 다른 재료를 골라보세요!');return;}
-selected=selected===it.id?'':it.id;
-root.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.id===selected));
-feedback(selected?`${it.name} 선택 완료! 피자 위를 눌러 재료를 올리세요.`:'재료 선택을 해제했어요.');
-});root.appendChild(b);
-});
-}
-function refreshOrder(){const o=orders[orderIndex%orders.length];$('orderName').textContent=o.name;$('orderEmoji').textContent=o.emoji;$('orderNo').textContent='#'+String(orderNo).padStart(3,'0');}
-function serve(){
-const o=orders[orderIndex%orders.length],need={};o.need.forEach(id=>need[id]=(need[id]||0)+1);
-const got={};placed.forEach(p=>got[p.id]=(got[p.id]||0)+1);
-let matched=0,total=o.need.length;
-Object.keys(need).forEach(id=>matched+=Math.min(need[id],got[id]||0));
-const pct=Math.round(matched/total*100),bonus=pct===100?500:pct>=70?250:pct>=40?100:0;
-tips+=bonus;$('tips').textContent=tips.toLocaleString('ko-KR')+'원';
-$('lastResult').textContent=pct===100?'완벽한 주문! 손님이 아주 좋아해요!':`주문 완성도 ${pct}% · 다음엔 주문 재료를 더 맞춰보세요.`;
-feedback(pct===100?`대성공! 주문과 똑같은 피자예요. 팁 ${bonus}원을 받았어요!`:pct>=70?`잘 만들었어요! 주문 완성도 ${pct}%. 팁 ${bonus}원을 받았어요.`:`주문 완성도 ${pct}%. 팁 ${bonus}원! 주문서의 재료를 확인해 보세요.`);
-orderIndex++;orderNo++;placed=[];selected='dough';buildButtons();refreshOrder();draw();updateScore();
-}
-canvas.addEventListener('click',e=>{
-if(!selected){feedback('먼저 재료를 선택해주세요!');return;}
-if(selected==='dough'&&placed.some(p=>p.id==='dough')){feedback('도우는 한 번만 놓을 수 있어요. 다른 재료를 골라주세요.');return;}
-const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*500,y=(e.clientY-rect.top)/rect.height*500;
-if(Math.hypot(x-250,y-250)>174){feedback('피자 안쪽에 재료를 올려주세요!');return;}
-if(selected==='sauce'&&placed.some(p=>p.id==='sauce')){feedback('소스는 이미 발랐어요!');return;}
-if(selected==='cheese'&&!placed.some(p=>p.id==='sauce')){feedback('먼저 토마토소스를 발라주세요!');return;}
-if(!placed.some(p=>p.id==='dough')&&selected!=='dough'){feedback('먼저 도우를 준비해주세요!');return;}
-if(selected==='dough'){placed.push({id:selected,x:250,y:250});selected='sauce';}
-else placed.push({id:selected,x,y});
-buildButtons();draw();updateScore();feedback(`${ingredients.find(i=>i.id===placed[placed.length-1].id).name} 추가 완료! 계속 꾸며보세요.`);
-});
-$('clear').addEventListener('click',()=>{placed=[];selected='dough';buildButtons();draw();updateScore();feedback('새 피자를 만들어요. 도우부터 시작하세요!');});
-$('serve').addEventListener('click',()=>{if(!placed.some(p=>p.id==='dough')){feedback('아직 도우가 없어요! 도우부터 만들어주세요.');return;}if(!placed.some(p=>p.id==='sauce')){feedback('토마토소스를 바르면 더 맛있어져요!');return;}serve();});
-buildButtons();refreshOrder();draw();updateScore();
+(() => {
+ const $=s=>document.querySelector(s), key='englishTutorPlanner_v1';
+ const initial={tasks:[{id:1,title:'Unit 1 단어 20개 외우기',due:'',done:false,answer:''},{id:2,title:'워크북 p.12–13 풀기',due:'',done:false,answer:''}],schedule:[],studies:[],question:''};
+ let data; try{data=JSON.parse(localStorage.getItem(key))||initial}catch{data=initial}
+ const save=()=>localStorage.setItem(key,JSON.stringify(data));
+ const dateFmt=s=>{if(!s)return '';const d=new Date(s+'T00:00:00');return new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric'}).format(d)+' 마감'};
+ $('#today').textContent=new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date());
+ function renderTasks(){const list=$('#taskList');list.innerHTML='';if(!data.tasks.length){list.innerHTML='<div class="empty">등록된 숙제가 없어요. 새 숙제를 추가해 보세요!</div>'}data.tasks.forEach(t=>{const el=document.createElement('article');el.className='task'+(t.done?' done':'');el.innerHTML=`<input class="check" type="checkbox" ${t.done?'checked':''} aria-label="${t.done?'완료 취소':'숙제 제출 완료 체크'}"><div><div class="task-title"></div><div class="meta"><span class="badge ${t.done?'complete':''}">${t.done?'✓ 제출 완료':'진행 중'}</span><span>${dateFmt(t.due)}</span></div>${t.answer?'<div class="answer"></div>':''}</div><button class="secondary">${t.done?'수정':'제출하기'}</button>`;el.querySelector('.task-title').textContent=t.title;if(t.answer)el.querySelector('.answer').textContent='제출 내용: '+t.answer;el.querySelector('input').onchange=()=>{t.done=el.querySelector('input').checked;save();render()};el.querySelector('button').onclick=()=>openSubmit(t);list.appendChild(el)});const done=data.tasks.filter(t=>t.done).length;$('#remaining').textContent=data.tasks.length-done;$('#completed').textContent=done;$('#progressText').textContent=`${data.tasks.length}개 중 ${done}개 완료 (${data.tasks.length?Math.round(done/data.tasks.length*100):0}%)`;$('#progressBar').style.width=(data.tasks.length?done/data.tasks.length*100:0)+'%'}
+ function renderSchedules(){const list=$('#scheduleList');list.innerHTML='';if(!data.schedule.length)list.innerHTML='<div class="empty">기록된 일정이 없어요.</div>';data.schedule.forEach((s,i)=>{const el=document.createElement('div');el.className='task';el.innerHTML='<div>📅</div><div><div class="task-title"></div><div class="meta"></div></div><button class="secondary">삭제</button>';el.querySelector('.task-title').textContent=s.text;el.querySelector('.meta').textContent=dateFmt(s.date)||'날짜 미정';el.querySelector('button').onclick=()=>{data.schedule.splice(i,1);save();renderSchedules()};list.appendChild(el)})}
+ function renderStudies(){const list=$('#studyList');list.innerHTML='';if(!data.studies.length)list.innerHTML='<div class="empty">아직 공부 기록이 없어요.</div>';data.studies.forEach((s,i)=>{const el=document.createElement('div');el.className='task';el.innerHTML='<div>✅</div><div><div class="task-title"></div><div class="meta"></div></div><button class="secondary">삭제</button>';el.querySelector('.task-title').textContent=s.text;el.querySelector('.meta').textContent=s.minutes+'분 공부';el.querySelector('button').onclick=()=>{data.studies.splice(i,1);save();renderStudies()};list.appendChild(el)})}
+ function render(){renderTasks();renderSchedules();renderStudies();$('#savedQuestion').textContent=data.question?'저장된 질문: '+data.question:''}
+ let activeTask=null;function openSubmit(t){activeTask=t;$('#modalTask').textContent=t.title;$('#answerText').value=t.answer||'';$('#submitModal').classList.add('open');$('#answerText').focus()}
+ $('#cancelSubmit').onclick=()=>$('#submitModal').classList.remove('open');$('#confirmSubmit').onclick=()=>{if(!activeTask)return;activeTask.answer=$('#answerText').value.trim();activeTask.done=true;save();$('#submitModal').classList.remove('open');render()};$('#submitModal').onclick=e=>{if(e.target.id==='submitModal')e.currentTarget.classList.remove('open')};
+ $('#addForm').onsubmit=e=>{e.preventDefault();data.tasks.unshift({id:Date.now(),title:$('#newTitle').value.trim(),due:$('#newDue').value,done:false,answer:''});save();e.target.reset();render()};$('#clearDone').onclick=()=>{data.tasks=data.tasks.filter(t=>!t.done);save();render()};
+ $('#scheduleForm').onsubmit=e=>{e.preventDefault();data.schedule.push({text:$('#scheduleText').value.trim(),date:$('#scheduleDate').value});save();e.target.reset();renderSchedules()};$('#saveQuestion').onclick=()=>{data.question=$('#questionText').value.trim();save();render()};$('#questionText').value=data.question||'';
+ $('#saveStudy').onclick=()=>{const text=$('#studyText').value.trim(),minutes=Number($('#studyMinutes').value);if(!text||!minutes)return;data.studies.unshift({text,minutes});save();$('#studyText').value='';$('#studyMinutes').value='';renderStudies()};
+ const words=[['achieve','이루다, 성취하다'],['improve','향상시키다'],['curious','궁금한, 호기심 많은'],['prepare','준비하다'],['protect','보호하다']];let wi=0;$('#showMeaning').onclick=()=>{$('#meaning').style.display=$('#meaning').style.display==='none'?'block':'none';$('#showMeaning').textContent=$('#meaning').style.display==='none'?'뜻 보기':'뜻 숨기기'};$('#nextWord').onclick=()=>{wi=(wi+1)%words.length;$('#word').textContent=words[wi][0];$('#meaning').textContent=words[wi][1];$('#meaning').style.display='none';$('#showMeaning').textContent='뜻 보기'};
+ document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.target).scrollIntoView({behavior:'smooth',block:'start'}));render();
 })();
 </script>
 </body>
