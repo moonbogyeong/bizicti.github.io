@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f4ef">
+<title>마이페이지 — ATELIER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<style>
+:root{--ink:#20211e;--muted:#77786f;--paper:#f6f4ef;--line:#deddd6;--accent:#c04c31;--olive:#70755a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans','Noto Sans KR',sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.topline{background:#24251f;color:#f7f4ed;text-align:center;padding:10px;font-size:11px;letter-spacing:.12em}
+.nav{height:76px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line)}
+.brand{font-size:24px;font-weight:700;letter-spacing:.19em}
+.wrap{max-width:720px;margin:48px auto 80px;padding:0 24px}
+h1{font-size:28px;font-weight:500;letter-spacing:-.04em;margin:0 0 6px}
+.sub{color:var(--muted);font-size:12px;margin:0 0 30px}
+.card{background:#fff;border:1px solid var(--line);padding:26px;margin-bottom:22px}
+.card h2{font-size:16px;font-weight:600;margin:0 0 18px;letter-spacing:-.02em}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:11px;letter-spacing:.1em;color:var(--muted);margin-bottom:7px}
+.field input,.field select{width:100%;padding:12px 13px;border:1px solid var(--line);background:#fff;font:inherit;font-size:14px;outline:0}
+.field input:focus,.field select:focus{border-color:var(--ink)}
+.inline{display:flex;gap:9px}.inline input{flex:1}
+.btn-outline{padding:12px 16px;border:1px solid var(--ink);background:#fff;font-size:12px;white-space:nowrap}
+.submit{padding:14px 24px;background:var(--ink);color:#fff;border:0;font-size:13px;letter-spacing:.08em}
+.submit:hover{background:#000}
+.order{border-top:1px solid var(--line);padding:14px 0;font-size:13px}
+.order:first-of-type{border-top:0}
+.order .top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:6px}
+.order .nm{line-height:1.7}
+.order .addr{color:var(--muted);font-size:11px;margin-top:6px}
+.empty{color:var(--muted);font-size:13px}
+.back{display:inline-block;margin-top:14px;font-size:12px;color:var(--muted);border-bottom:1px solid}
+.login-needed{text-align:center;padding:70px 20px}
+.login-needed a{display:inline-block;margin-top:18px;background:var(--ink);color:#fff;padding:13px 24px;font-size:12px}
+.toast{position:fixed;bottom:25px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:white;padding:13px 20px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style></head>
+<body>
+<div class="topline">FREE SHIPPING ON ORDERS OVER ₩50,000 · 신상 매주 업데이트</div>
+<nav class="nav"><a class="brand" href="index.html">ATELIER</a></nav>
+
+<div class="wrap" id="content"></div>
+<footer style="border-top:1px solid var(--line);padding:30px 6.5%;display:flex;flex-direction:column;gap:12px;font-size:11px;color:var(--muted)">
+  <div style="display:flex;gap:18px;flex-wrap:wrap"><a href="terms.html">이용약관</a><a href="privacy.html" style="font-weight:600">개인정보처리방침</a><a href="index.html">쇼핑몰</a></div>
+  <div style="line-height:1.9;color:#8a8b82">상호 ATELIER ｜ 대표 [입력 필요] ｜ 사업자등록번호 [입력 필요]<br>통신판매업신고 [입력 필요] ｜ 주소 [입력 필요] ｜ 고객센터 [입력 필요]</div>
+  <span>© 2025 ATELIER. ALL RIGHTS RESERVED.</span>
+</footer>
+<div class="toast" id="toast"></div>
+<script>
+function won(n){return '₩'+n.toLocaleString('ko-KR')}
+function parsePrice(s){return parseInt(String(s).replace(/[^0-9]/g,''),10)||0}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2100)}
+
+let me=null, defaultAddrId=null;
+
+(async function init(){
+  if(typeof sb==='undefined'){
+    document.getElementById('content').innerHTML='<div class="login-needed"><h1>마이페이지</h1><p class="sub">supabaseClient.js 설정이 필요해요.</p></div>';
+    return;
+  }
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){
+    document.getElementById('content').innerHTML=
+      '<div class="login-needed"><h1>마이페이지</h1><p class="sub">로그인 후 배송지 설정과 주문 내역을 확인할 수 있어요.</p><a href="login.html">로그인하러 가기</a></div>';
+    return;
+  }
+  me=user;
+
+  // 프로필, 기본 배송지, 주문 내역 불러오기
+  const [{ data: prof }, { data: addr }, { data: orders }] = await Promise.all([
+    sb.from('profiles').select('name,phone').eq('id',user.id).single(),
+    sb.from('addresses').select('*').eq('user_id',user.id).eq('is_default',true).limit(1).maybeSingle(),
+    sb.from('orders').select('*, order_items(*)').eq('user_id',user.id).order('created_at',{ascending:false})
+  ]);
+  const a=addr||{};
+  if(addr)defaultAddrId=addr.id;
+  const name=(prof&&prof.name)||user.user_metadata?.name||'';
+
+  document.getElementById('content').innerHTML=`
+    <h1>${name}님의 마이페이지</h1>
+    <p class="sub">${user.email}</p>
+
+    <div class="card">
+      <h2>기본 배송지 설정</h2>
+      <p class="sub" style="margin-top:-8px">여기에 저장하면 결제 화면에서 배송지가 자동으로 입력돼요.</p>
+      <div class="field"><label>받는 분</label><input id="a-name" value="${a.recipient||name||''}"></div>
+      <div class="field"><label>연락처</label><input id="a-phone" placeholder="010-1234-5678" value="${a.phone||''}"></div>
+      <div class="field"><label>우편번호</label><div class="inline"><input id="a-zip" readonly value="${a.zip||''}"><button type="button" class="btn-outline" onclick="findAddr()">주소 찾기</button></div></div>
+      <div class="field"><label>기본 주소</label><input id="a-addr1" readonly value="${a.addr1||''}"></div>
+      <div class="field"><label>상세 주소</label><input id="a-addr2" value="${a.addr2||''}"></div>
+      <div class="field"><label>배송 요청사항</label>
+        <select id="a-memo">
+          <option value="">선택 안 함</option>
+          <option>문 앞에 놓아주세요</option>
+          <option>경비실에 맡겨주세요</option>
+          <option>배송 전 연락 주세요</option>
+          <option>부재 시 문 앞에 놓아주세요</option>
+        </select>
+      </div>
+      <button class="submit" onclick="saveAddr()">배송지 저장</button>
+    </div>
+
+    <div class="card">
+      <h2>주문 내역</h2>
+      ${(orders&&orders.length)?orders.map(o=>`
+        <div class="order">
+          <div class="top"><span>${new Date(o.created_at).toLocaleString('ko-KR')}</span><span>${o.status} · ${o.pay_method} · ${won(o.total)}</span></div>
+          <div class="nm">${(o.order_items||[]).map(it=>it.name).join(', ')}</div>
+          <div class="addr">[${o.ship_zip}] ${o.ship_addr1} ${o.ship_addr2||''}</div>
+        </div>`).join(''):'<div class="empty">아직 주문 내역이 없어요.</div>'}
+    </div>
+
+    <a class="back" href="index.html">← 쇼핑 계속하기</a>
+  `;
+  if(a.memo)document.getElementById('a-memo').value=a.memo;
+})();
+
+function findAddr(){
+  new daum.Postcode({oncomplete:function(data){
+    document.getElementById('a-zip').value=data.zonecode;
+    document.getElementById('a-addr1').value=data.roadAddress||data.jibunAddress;
+    document.getElementById('a-addr2').focus();
+  }}).open();
+}
+
+async function saveAddr(){
+  if(!me){toast('로그인이 필요해요');return}
+  const a={
+    recipient:document.getElementById('a-name').value.trim(),
+    phone:document.getElementById('a-phone').value.trim(),
+    zip:document.getElementById('a-zip').value.trim(),
+    addr1:document.getElementById('a-addr1').value.trim(),
+    addr2:document.getElementById('a-addr2').value.trim(),
+    memo:document.getElementById('a-memo').value
+  };
+  if(!a.recipient||!a.phone||!a.zip){toast('받는 분·연락처·주소를 입력해 주세요');return}
+  let error;
+  if(defaultAddrId){
+    ({ error } = await sb.from('addresses').update(a).eq('id',defaultAddrId));
+  }else{
+    // 기존 기본 해제 후 새 기본 배송지 저장
+    await sb.from('addresses').update({is_default:false}).eq('user_id',me.id).eq('is_default',true);
+    const res = await sb.from('addresses').insert({user_id:me.id, ...a, is_default:true}).select().single();
+    error=res.error; if(res.data)defaultAddrId=res.data.id;
+  }
+  if(error){toast('저장 실패: '+error.message);return}
+  toast('기본 배송지가 저장됐어요');
+}
+</script>
+</body></html>
