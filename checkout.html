@@ -1,4 +1,4 @@
-<!doctype html>
+sb_publishable_8ctDm_qLUFv-vKnvzeR6gQ_ePxVro0j<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -11,7 +11,7 @@
 <!-- 다음(카카오) 우편번호 서비스 -->
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+<script src="supabaseClient.js?v=2"></script>
 <style>
 :root{--ink:#20211e;--muted:#77786f;--paper:#f6f4ef;--line:#deddd6;--accent:#c04c31;--olive:#70755a}
 *{box-sizing:border-box}
@@ -152,6 +152,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-.04em;margin:0 0 28px}
 
 <div class="toast" id="toast"></div>
 <script>
+const $=id=>document.getElementById(id);
 function won(n){return '₩'+n.toLocaleString('ko-KR')}
 function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2100)}
 function parsePrice(s){return parseInt(String(s).replace(/[^0-9]/g,''),10)||0}
@@ -182,20 +183,20 @@ let currentUserId=null;
   if(!user)return;
   currentUserId=user.id;
   // 주문자 정보 자동 채움 (프로필)
-  buyer_email.value=user.email||'';
+  $('buyer-email').value=user.email||'';
   const { data: prof } = await sb.from('profiles').select('name,phone').eq('id',user.id).single();
-  if(prof){buyer_name.value=prof.name||'';buyer_phone.value=prof.phone||''}
+  if(prof){$('buyer-name').value=prof.name||'';$('buyer-phone').value=prof.phone||''}
   // 기본 배송지 불러오기
   const { data: addr } = await sb.from('addresses')
     .select('*').eq('user_id',user.id).eq('is_default',true).limit(1).maybeSingle();
   if(addr){
-    ship_name.value=addr.recipient||'';
-    ship_phone.value=addr.phone||'';
-    zip.value=addr.zip||'';
-    addr1.value=addr.addr1||'';
-    addr2.value=addr.addr2||'';
-    if(addr.memo)ship_memo.value=addr.memo;
-    document.getElementById('saved-badge').style.display='block';
+    $('ship-name').value=addr.recipient||'';
+    $('ship-phone').value=addr.phone||'';
+    $('zip').value=addr.zip||'';
+    $('addr1').value=addr.addr1||'';
+    $('addr2').value=addr.addr2||'';
+    if(addr.memo)$('ship-memo').value=addr.memo;
+    $('saved-badge').style.display='block';
   }
 })();
 
@@ -208,8 +209,8 @@ function findAddr(){
 }
 function copyBuyer(cb){
   if(cb.checked){
-    ship_name.value=buyer_name.value;
-    ship_phone.value=buyer_phone.value;
+    $('ship-name').value=$('buyer-name').value;
+    $('ship-phone').value=$('buyer-phone').value;
   }
 }
 async function placeOrder(e){
@@ -220,7 +221,7 @@ async function placeOrder(e){
   const pay=document.querySelector('input[name=pay]:checked').value;
   const ship=goods>=50000?0:3000;
   const total=goods+ship;
-  const addrObj={recipient:ship_name.value,phone:ship_phone.value,zip:zip.value,addr1:addr1.value,addr2:addr2.value,memo:ship_memo.value};
+  const addrObj={recipient:$('ship-name').value,phone:$('ship-phone').value,zip:$('zip').value,addr1:$('addr1').value,addr2:$('addr2').value,memo:$('ship-memo').value};
 
   // 1) 기본 배송지 저장 (체크 시) — 기존 기본 해제 후 새로 저장
   if(document.getElementById('save-addr').checked){
@@ -231,9 +232,9 @@ async function placeOrder(e){
   // 2) 주문 헤더 저장
   const { data: order, error: oErr } = await sb.from('orders').insert({
     user_id:currentUserId,
-    buyer_name:buyer_name.value, buyer_phone:buyer_phone.value, buyer_email:buyer_email.value,
-    ship_recipient:ship_name.value, ship_phone:ship_phone.value, ship_zip:zip.value,
-    ship_addr1:addr1.value, ship_addr2:addr2.value, ship_memo:ship_memo.value,
+    buyer_name:$('buyer-name').value, buyer_phone:$('buyer-phone').value, buyer_email:$('buyer-email').value,
+    ship_recipient:$('ship-name').value, ship_phone:$('ship-phone').value, ship_zip:$('zip').value,
+    ship_addr1:$('addr1').value, ship_addr2:$('addr2').value, ship_memo:$('ship-memo').value,
     pay_method:pay, total, status:'결제완료'
   }).select().single();
   if(oErr){toast('주문 저장에 실패했어요: '+oErr.message);return false}

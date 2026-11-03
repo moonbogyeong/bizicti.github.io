@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+<script src="supabaseClient.js?v=2"></script>
 <style>
 :root{--ink:#20211e;--muted:#77786f;--paper:#f6f4ef;--line:#deddd6;--accent:#c04c31;--olive:#70755a}
 *{box-sizing:border-box}
@@ -168,16 +168,18 @@ if(!supabaseConfigured()){
 
 async function doSignup(e){
   e.preventDefault();
-  const name=su_name.value.trim(),email=su_email.value.trim().toLowerCase(),
-        phone=su_phone.value.trim(),pw=su_pw.value,pw2=su_pw2.value;
-  if(pw!==pw2){document.getElementById('su-err').style.display='block';return false}
+  if(typeof sb==='undefined'){ toast('Supabase 로드 실패. 새로고침 해주세요'); return false; }
+  const $=id=>document.getElementById(id);
+  const name=$('su-name').value.trim(), email=$('su-email').value.trim().toLowerCase(),
+        phone=$('su-phone').value.trim(), pw=$('su-pw').value, pw2=$('su-pw2').value;
+  if(pw!==pw2){$('su-err').style.display='block';return false}
   document.getElementById('su-err').style.display='none';
   // 필수 동의 확인
   const termsOk=document.getElementById('ag-terms').checked;
   const privacyOk=document.getElementById('ag-privacy').checked;
-  if(!termsOk||!privacyOk){document.getElementById('agree-err').style.display='block';return false}
-  document.getElementById('agree-err').style.display='none';
-  const marketing=document.getElementById('ag-marketing').checked;
+  if(!termsOk||!privacyOk){$('agree-err').style.display='block';return false}
+  $('agree-err').style.display='none';
+  const marketing=$('ag-marketing').checked;
 
   // Supabase 회원가입 (name/phone/marketing은 메타데이터로 → 트리거가 profiles에 복사)
   const { data, error } = await sb.auth.signUp({
@@ -198,10 +200,12 @@ async function doSignup(e){
 
 async function doLogin(e){
   e.preventDefault();
-  const email=login_email.value.trim().toLowerCase(),pw=login_pw.value;
+  if(typeof sb==='undefined'){ toast('Supabase 로드 실패. 새로고침 해주세요'); return false; }
+  const $=id=>document.getElementById(id);
+  const email=$('login-email').value.trim().toLowerCase(),pw=$('login-pw').value;
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if(error){document.getElementById('login-err').style.display='block';return false}
-  document.getElementById('login-err').style.display='none';
+  if(error){$('login-err').style.display='block';return false}
+  $('login-err').style.display='none';
   const name=data.user?.user_metadata?.name||'';
   toast('로그인 성공! 반가워요 '+(name||email));
   setTimeout(()=>location.href='index.html',800);

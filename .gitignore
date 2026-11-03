@@ -12,3 +12,7 @@ node_modules/
 # 로컬 환경변수 / 비밀값
 .env
 .env.local
+
+# 로컬 테스트용 (저장소에 올리지 않음)
+_serve.ps1
+_diag.html
