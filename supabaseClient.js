@@ -5,8 +5,8 @@
 //   - Project URL        → SUPABASE_URL
 //   - anon public key     → SUPABASE_ANON_KEY  (공개돼도 되는 키, service_role 키 아님!)
 // ============================================================
-const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';   // ← 교체
-const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';          // ← 교체
+const SUPABASE_URL = 'https://lllyjtniltoejsnfajsz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_8ctDm_qLUFv-vKnvzeR6gQ_ePxVro0j';  // publishable(공개) 키
 
 // supabase-js UMD 번들이 먼저 로드돼 있어야 합니다 (각 html <head>에 CDN 추가됨)
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
