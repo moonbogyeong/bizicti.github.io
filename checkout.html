@@ -168,8 +168,8 @@ function won(n){return '₩'+n.toLocaleString('ko-KR')}
 function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2100)}
 function parsePrice(s){return parseInt(String(s).replace(/[^0-9]/g,''),10)||0}
 
-// 장바구니 불러오기
-let cart=JSON.parse(localStorage.getItem('atelier_cart')||'[]');
+// 장바구니 불러오기 (형식: {item, qty}. 구버전 상품배열도 자동 변환)
+let cart=(JSON.parse(localStorage.getItem('atelier_cart')||'[]')).map(c=>Array.isArray(c)?{item:c,qty:1}:c);
 let goods=0;
 function renderOrder(){
   if(!cart.length){
@@ -177,8 +177,8 @@ function renderOrder(){
     return;
   }
   const box=document.getElementById('order-items');
-  box.innerHTML=cart.map(p=>`<div class="item"><span class="nm">${p[2]}</span><span>${won(parsePrice(p[3]))}</span></div>`).join('');
-  goods=cart.reduce((s,p)=>s+parsePrice(p[3]),0);
+  box.innerHTML=cart.map(c=>`<div class="item"><span class="nm">${c.item[2]} <span style="color:var(--muted)">× ${c.qty}</span></span><span>${won(parsePrice(c.item[3])*c.qty)}</span></div>`).join('');
+  goods=cart.reduce((s,c)=>s+parsePrice(c.item[3])*c.qty,0);
   const ship=goods>=50000||goods===0?0:3000;
   document.getElementById('sum-goods').textContent=won(goods);
   document.getElementById('sum-ship').textContent=ship?won(ship):'무료';
@@ -251,7 +251,7 @@ async function placeOrder(e){
   if(oErr){toast('주문 저장에 실패했어요: '+oErr.message);return false}
 
   // 3) 주문 상품 저장
-  const rows=cart.map(p=>({order_id:order.id, product_id:p[2], name:p[2], price:parsePrice(p[3]), qty:1}));
+  const rows=cart.map(c=>({order_id:order.id, product_id:c.item[2], name:c.item[2], price:parsePrice(c.item[3]), qty:c.qty}));
   await sb.from('order_items').insert(rows);
 
   // 4) 장바구니 비우기
