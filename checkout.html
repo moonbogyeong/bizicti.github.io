@@ -234,10 +234,15 @@ async function placeOrder(e){
   const total=goods+ship;
   const addrObj={recipient:$('ship-name').value,phone:$('ship-phone').value,zip:$('zip').value,addr1:$('addr1').value,addr2:$('addr2').value,memo:$('ship-memo').value};
 
-  // 1) 기본 배송지 저장 (체크 시) — 기존 기본 해제 후 새로 저장
+  // 1) 기본 배송지 저장 (체크 시) — 기존 기본 배송지가 있으면 덮어쓰고, 없을 때만 새로 생성 (중복 방지)
   if(document.getElementById('save-addr').checked){
-    await sb.from('addresses').update({is_default:false}).eq('user_id',currentUserId).eq('is_default',true);
-    await sb.from('addresses').insert({user_id:currentUserId, ...addrObj, is_default:true});
+    const { data: existing } = await sb.from('addresses')
+      .select('id').eq('user_id',currentUserId).eq('is_default',true).limit(1).maybeSingle();
+    if(existing){
+      await sb.from('addresses').update(addrObj).eq('id',existing.id);
+    }else{
+      await sb.from('addresses').insert({user_id:currentUserId, ...addrObj, is_default:true});
+    }
   }
 
   // 2) 주문 헤더 저장
