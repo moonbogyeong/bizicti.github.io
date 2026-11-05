@@ -56,7 +56,18 @@ h1{font-size:28px;font-weight:500;letter-spacing:-.04em;margin:0 0 28px}
 .done h1{margin:16px 0 10px}
 .done p{color:var(--muted);font-size:13px;line-height:1.9}
 .done a{display:inline-block;margin-top:26px;background:var(--ink);color:#fff;padding:14px 26px;font-size:12px;letter-spacing:.08em}
-@media(max-width:800px){.layout{grid-template-columns:1fr;gap:24px}.summary{position:static}}
+@media(max-width:800px){.layout{grid-template-columns:1fr;gap:24px;margin:28px auto 60px;padding:0 16px}.summary{position:static}h1{font-size:24px}.card{padding:20px}}
+@media(max-width:480px){
+  .nav{height:60px}.brand{font-size:20px}
+  h1{font-size:22px;margin-bottom:20px}
+  .card{padding:16px 15px;margin-bottom:16px}
+  /* iOS 입력 시 자동 확대 방지: 입력칸 글자 16px 이상 */
+  .field input,.field select,.field textarea{font-size:16px;padding:13px}
+  .btn-outline{padding:13px 14px}
+  .payopt label{min-width:100%;padding:14px}
+  .submit{padding:16px;font-size:15px}
+  .done{margin:50px auto;padding:0 18px}
+}
 </style></head>
 <body>
 <div class="topline">FREE SHIPPING ON ORDERS OVER ₩50,000 · 신상 매주 업데이트</div>
