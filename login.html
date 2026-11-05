@@ -92,7 +92,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-.04em;margin:10px 0 28px}
     <button class="submit" type="submit">로그인</button>
     <div class="divider">또는</div>
     <div class="social">
-      <button type="button" class="sbtn kakao" onclick="toast('카카오 로그인은 준비 중이에요')">카카오로 시작하기</button>
+      <button type="button" class="sbtn kakao" onclick="social('kakao')">카카오로 시작하기</button>
       <button type="button" class="sbtn naver" onclick="toast('네이버 로그인은 준비 중이에요')">네이버로 시작하기</button>
       <button type="button" class="sbtn" onclick="toast('Apple 로그인은 준비 중이에요')"> Apple로 시작하기</button>
     </div>
@@ -221,8 +221,16 @@ async function doLogin(e){
   return false;
 }
 
-// 소셜 로그인 (Supabase Auth Provider 설정 후 주석 해제해서 사용)
-// async function social(provider){ await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: location.origin+'/index.html' } }); }
+// 소셜 로그인 (Supabase Auth Provider에 해당 제공자 설정이 돼 있어야 작동)
+async function social(provider){
+  // 현재 페이지가 있는 폴더로 돌아오게 함 (로컬/공개 배포 모두 대응)
+  const base = location.href.replace(/\/[^\/]*$/, '');
+  const { error } = await sb.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: base + '/index.html' }
+  });
+  if(error){ toast(error.message || (provider+' 로그인에 실패했어요')); }
+}
 
 // URL에 ?tab=signup 이면 회원가입 탭으로
 if(new URLSearchParams(location.search).get('tab')==='signup')switchTab('signup');
